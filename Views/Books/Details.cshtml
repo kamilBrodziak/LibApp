@@ -1,0 +1,15 @@
+﻿@model LibApp.Models.Book
+
+@{ 
+    ViewBag.Title = Model.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.Name</h2>
+<ul>
+    <li>Author Name: @Model.AuthorName</li>
+    <li>Genre: @Model.Genre.Name</li>
+    <li>Release Date: @Model.ReleaseDate</li>
+    <li>Date Added: @Model.DateAdded</li>
+    <li>Numbers in Stock: @Model.NumberInStock</li>
+</ul>

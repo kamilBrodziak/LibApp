@@ -1,0 +1,105 @@
+﻿@{
+    ViewBag.Title = "New Rental";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>New Rental</h2>
+
+<form id="newRental">
+    <div class="form-group">
+        <label>Customer</label>
+        <div class="tt-container">
+            <input id="customer" type="text" value="" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Book</label>
+        <div class="tt-container">
+            <input id="book" type="text" value="" class="form-control" />
+        </div>
+    </div>
+    <ul id="books" class="list-group"></ul>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-4">
+            <button class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            var formData = {
+                customerId: 0,
+                bookIds: []
+            };
+
+            var customers = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '/api/customers?query=%QUERY',
+                    wildcard: '%QUERY'
+                }
+            });
+
+            $('#customer').typeahead(
+                {
+                    minLength: 3,
+                    highlight: true
+                },
+                {
+                name: 'customers',
+                display: 'name',
+                source: customers
+                }).on("typeahead:select", function (e, customer) {
+                    formData.customerId = customer.id;
+                });
+
+            var books = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '/api/books?query=%QUERY',
+                    wildcard: '%QUERY'
+                }
+            });
+
+            $('#book').typeahead(
+                {
+                    minLength: 3,
+                    highlight: true
+                },
+                {
+                    name: 'books',
+                    display: 'name',
+                    source: books
+                }).on("typeahead:select", function (e, book) {
+                    $("#books").append("<li class='list-group-item'>" + book.name + "</li>");
+                    $("#book").typeahead("val", "");
+                    formData.bookIds.push(book.id);
+                });
+
+            $("#newRental").submit(function (e) {
+                e.preventDefault();
+                var postData = JSON.stringify(formData);
+
+                $.ajax({
+                    url: "/api/newRentals",
+                    type: "POST",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: 'html',
+                    data: postData,
+                    success: function () {
+                        console.log("Success " + postData);
+                    },
+                    fail: function () {
+                        console.log("Failure " + postData);
+                    }
+                })
+            });
+        });
+    </script>
+}
