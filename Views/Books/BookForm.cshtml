@@ -9,27 +9,38 @@
 
 @using (Html.BeginForm("Save", "Books"))
 {
+    @Html.ValidationSummary(true)
     <div class="form-group">
         @Html.LabelFor(m => m.Book.Name)
         @Html.TextBoxFor(m => m.Book.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Book.Name)
     </div>
     <div class="form-group">
         @Html.LabelFor(m => m.Book.AuthorName)
         @Html.TextBoxFor(m => m.Book.AuthorName, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Book.AuthorName)
     </div>
     <div class="form-group">
         @Html.LabelFor(m => m.Book.GenreId)
         @Html.DropDownListFor(m => m.Book.GenreId, new SelectList(Model.Genres, "Id", "Name"), "Select Genre", new { @class = "form=control" })
+        @Html.ValidationMessageFor(m => m.Book.GenreId)
     </div>
     <div class="form-group">
         @Html.LabelFor(m => m.Book.ReleaseDate)
         @Html.TextBoxFor(m => m.Book.ReleaseDate, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Book.ReleaseDate)
     </div>
     <div class="form-group">
         @Html.LabelFor(m => m.Book.NumberInStock)
         @Html.TextBoxFor(m => m.Book.NumberInStock, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Book.NumberInStock)
     </div>
 
     @Html.HiddenFor(m => m.Book.Id);
     <button type="submit" class="btn btn-primary">Save</button>
+}
+
+@section scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
 }
