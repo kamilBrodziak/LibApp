@@ -21,6 +21,7 @@ namespace LibApp.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CustomersController : ControllerBase
     {
         private readonly ICustomerRepository _customerRepository;
@@ -33,6 +34,7 @@ namespace LibApp.Controllers.Api
 
         // GET /api/customers
         [HttpGet]
+        [Authorize(Roles = "StoreManager,Owner")]
         public IActionResult GetCustomers(string query = null)
         {
             IEnumerable<Customer> customersQuery = _customerRepository.GetCustomers();
@@ -51,6 +53,7 @@ namespace LibApp.Controllers.Api
 
         // GET /api/customers/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "StoreManager,Owner")]
         public IActionResult GetCustomer(int id)
         {
             Console.WriteLine("Request beginning");
@@ -68,6 +71,7 @@ namespace LibApp.Controllers.Api
 
         // POST /api/customers/
         [HttpPost]
+        [Authorize(Roles = "Owner")]
         public IActionResult CreateCustomer(CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
@@ -85,6 +89,7 @@ namespace LibApp.Controllers.Api
 
         // PUT api/customers/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Owner")]
         public IActionResult UpdateCustomer(int id, CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
@@ -107,6 +112,7 @@ namespace LibApp.Controllers.Api
 
         // DELETE /api/customers
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Owner")]
         public IActionResult DeleteCustomer(int id)
         {
             var customerInDb = _customerRepository.GetCustomerById(id);
