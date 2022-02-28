@@ -35,17 +35,20 @@ namespace LibApp.Controllers.Api
         }
         [HttpGet]
         [Authorize(Roles ="User,StoreManager,Owner")]
-        public IEnumerable<BookDto> GetBooks(string query = null) 
+        public IActionResult GetBooks(string query = null) 
         {
             var booksQuery = _bookRepository.GetBooks()
                 .Where(b => b.NumberAvailable > 0);
-
             if (!string.IsNullOrWhiteSpace(query))
             {
                 booksQuery = booksQuery.Where(b => b.Name.Contains(query));
             }
 
-            return booksQuery.ToList().Select(_mapper.Map<Book, BookDto>);
+            var booksDto = booksQuery
+                .ToList()
+                .Select(_mapper.Map<Book, BookDto>);
+
+            return Ok(booksDto);
         }
 
         [HttpGet("{id}")]
@@ -62,7 +65,7 @@ namespace LibApp.Controllers.Api
         }
 
         [HttpPost]
-        [Authorize(Roles = "User,StoreManager,Owner")]
+        [Authorize(Roles = "StoreManager,Owner")]
         public IActionResult CreateBook(BookDto bookDto)
         {
             if (!ModelState.IsValid)
@@ -80,7 +83,7 @@ namespace LibApp.Controllers.Api
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "User,StoreManager,Owner")]
+        [Authorize(Roles = "StoreManager,Owner")]
         public IActionResult UpdateBook(int id, BookDto bookDto)
         {
             if (!ModelState.IsValid)
@@ -103,7 +106,7 @@ namespace LibApp.Controllers.Api
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "User,StoreManager,Owner")]
+        [Authorize(Roles = "StoreManager,Owner")]
         public IActionResult DeleteBook(int id)
         {
             var bookInDb = _bookRepository.GetBookById(id);

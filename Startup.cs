@@ -101,7 +101,6 @@ namespace LibApp
                 };
 
                 var fetchedUser = await UserManager.FindByEmailAsync(user.Email);
-                
                 if (fetchedUser == null)
                 {
                     var newUser = await UserManager.CreateAsync(user, "Password!2345");

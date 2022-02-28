@@ -13,3 +13,8 @@
     <li>Date Added: @Model.DateAdded</li>
     <li>Numbers in Stock: @Model.NumberInStock</li>
 </ul>
+
+@if(User.IsInRole("Owner") || User.IsInRole("StoreManager"))
+    {
+        <a class='btn btn-secondary' asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+    }

@@ -4,6 +4,7 @@ using LibApp.Models;
 using LibApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using LibApp.Interfaces;
+using AuthorizeAttribute = Microsoft.AspNetCore.Authorization.AuthorizeAttribute;
 
 namespace LibApp.Controllers
 {
@@ -36,7 +37,7 @@ namespace LibApp.Controllers
 
             return View(book);
         }
-
+        [Authorize(Roles = "StoreManager,Owner")]
         public IActionResult Edit(int id)
         {
             var book = _bookRepository.GetBookById(id);
@@ -53,7 +54,7 @@ namespace LibApp.Controllers
 
             return View("BookForm", viewModel);
         }
-
+        [Authorize(Roles = "StoreManager,Owner")]
         public IActionResult New()
         {
             var genres = _genreRepository.GetGenres();
@@ -64,7 +65,7 @@ namespace LibApp.Controllers
 
             return View("BookForm", viewModel);
         }
-
+        [Authorize(Roles = "StoreManager,Owner")]
         public IActionResult Save(Book book)
         {
             if (book.Id == 0)
