@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LibApp.Data;
 using LibApp.Dtos;
+using LibApp.Interfaces;
 using LibApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,9 +23,11 @@ namespace LibApp.Controllers.Api
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        public CustomersController(ApplicationDbContext context, IMapper mapper)
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IMapper _mapper;
+        public CustomersController(ICustomerRepository customerRepository, IMapper mapper)
         {
-            _context = context;
+            _customerRepository = customerRepository;
             _mapper = mapper;
         }
 
@@ -32,10 +35,9 @@ namespace LibApp.Controllers.Api
         [HttpGet]
         public IActionResult GetCustomers(string query = null)
         {
-            IEnumerable<Customer> customersQuery = _context.Customers
-                .Include(c => c.MembershipType);
+            IEnumerable<Customer> customersQuery = _customerRepository.GetCustomers();
 
-            if (!String.IsNullOrWhiteSpace(query))
+            if (!string.IsNullOrWhiteSpace(query))
             {
                 customersQuery = customersQuery.Where(c => c.Name.Contains(query));
             }
@@ -49,12 +51,11 @@ namespace LibApp.Controllers.Api
 
         // GET /api/customers/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCustomer(int id)
+        public IActionResult GetCustomer(int id)
         {
             Console.WriteLine("Request beginning");
 
-            var customer = await _context.Customers.SingleOrDefaultAsync(c => c.Id == id);
-            await Task.Delay(2000);
+            var customer = _customerRepository.GetCustomerById(id);
             if (customer == null)
             {
                 throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
@@ -67,7 +68,7 @@ namespace LibApp.Controllers.Api
 
         // POST /api/customers/
         [HttpPost]
-        public CustomerDto CreateCustomer(CustomerDto customerDto)
+        public IActionResult CreateCustomer(CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
             {
@@ -75,23 +76,23 @@ namespace LibApp.Controllers.Api
             }
 
             var customer = _mapper.Map<Customer>(customerDto);
-            _context.Customers.Add(customer);
-            _context.SaveChanges();
+            _customerRepository.AddCustomer(customer);
+            _customerRepository.Save();
             customerDto.Id = customer.Id;
 
-            return customerDto;
+            return CreatedAtRoute(nameof(GetCustomer), new { id = customerDto.Id }, customerDto);
         }
 
         // PUT api/customers/{id}
         [HttpPut("{id}")]
-        public void UpdateCustomer(int id, CustomerDto customerDto)
+        public IActionResult UpdateCustomer(int id, CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
             {
                 throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
             }
 
-            var customerInDb = _context.Customers.SingleOrDefault(c => c.Id == customerDto.Id);
+            var customerInDb = _customerRepository.GetCustomerById(id);
             if (customerInDb == null)
             {
                 throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
@@ -99,24 +100,25 @@ namespace LibApp.Controllers.Api
 
 
             _mapper.Map(customerDto, customerInDb);
-            _context.SaveChanges();
+            _customerRepository.UpdateCustomer(customerInDb);
+            _customerRepository.Save();
+            return Ok(customerInDb);
         }
 
         // DELETE /api/customers
         [HttpDelete("{id}")]
-        public void DeleteCusomer(int id)
+        public IActionResult DeleteCustomer(int id)
         {
-            var customerInDb = _context.Customers.SingleOrDefault(c => c.Id == id);
+            var customerInDb = _customerRepository.GetCustomerById(id);
             if (customerInDb == null)
             {
                 throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
             }
 
-            _context.Customers.Remove(customerInDb);
-            _context.SaveChanges();
+            _customerRepository.DeleteCustomer(id);
+            _customerRepository.Save();
+            return NoContent();
         }
 
-        private ApplicationDbContext _context;
-        private readonly IMapper _mapper;
     }
 }

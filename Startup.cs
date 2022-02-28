@@ -42,6 +42,7 @@ namespace LibApp
             services.AddScoped<IGenreRepository, GenreRepository>();
             services.AddScoped<IMembershipTypeRepository, MembershipTypeRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IRentalRepository, RentalRepository>();
             services.AddControllersWithViews();
         }
 

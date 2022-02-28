@@ -1,5 +1,6 @@
 ﻿using LibApp.Data;
 using LibApp.Dtos;
+using LibApp.Interfaces;
 using LibApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,20 +16,23 @@ namespace LibApp.Controllers.Api
     [ApiController]
     public class NewRentalsController : ControllerBase
     {
-        public NewRentalsController(ApplicationDbContext context)
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IBookRepository _bookRepository;
+        private readonly IRentalRepository _rentalRepository;
+        public NewRentalsController(ICustomerRepository customerRepository, IBookRepository bookRepository, IRentalRepository rentalRepository)
         {
-            _context = context;
+            _rentalRepository = rentalRepository;
+            _bookRepository = bookRepository;
+            _customerRepository = customerRepository;
         }
+
 
         [HttpPost]
         public IActionResult CreateNewRental([FromBody] NewRentalDto newRental)
         {
-            var customer = _context.Customers
-                .Include(c => c.MembershipType)
-                .SingleOrDefault(c => c.Id == newRental.CustomerId);
+            var customer = _customerRepository.GetCustomerById(newRental.CustomerId);
 
-            var books = _context.Books
-                .Include(b => b.Genre)
+            var books = _bookRepository.GetBooks()
                 .Where(b => newRental.BookIds.Contains(b.Id)).ToList();
 
             foreach (var book in books)
@@ -43,14 +47,11 @@ namespace LibApp.Controllers.Api
                     Book = book,
                     DateRented = DateTime.Now
                 };
-
-                _context.Rentals.Add(rental);
+                _rentalRepository.AddRental(rental);
             }
-
-            _context.SaveChanges();
+            _rentalRepository.Save();
             return Ok();
         }
 
-        private readonly ApplicationDbContext _context;
     }
 }
